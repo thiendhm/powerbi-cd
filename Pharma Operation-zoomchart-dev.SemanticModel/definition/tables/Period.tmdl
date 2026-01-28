@@ -1,0 +1,36 @@
+table Period
+	lineageTag: be628df7-4851-41c9-a4a2-ed3c04f74996
+
+	column Period
+		dataType: string
+		lineageTag: b657293a-600f-4046-b1c9-56506e40672f
+		summarizeBy: none
+		sourceColumn: Period
+		sortByColumn: Index
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column Index
+		dataType: int64
+		formatString: 0
+		lineageTag: 22bbf01c-a928-4bc4-99fe-bdb8c051101e
+		summarizeBy: sum
+		sourceColumn: Index
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Period = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WClfSUTJUitWJVvIFsozArEAgyxjMigSyTJViYwE=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Period = _t, Index = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Period", type text}, {"Index", Int64.Type}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
+	annotation PBI_NavigationStepName = Navigation
+

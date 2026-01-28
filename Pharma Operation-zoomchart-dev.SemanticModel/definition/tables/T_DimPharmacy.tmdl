@@ -1,0 +1,102 @@
+table T_DimPharmacy
+	lineageTag: b70b6610-fe50-4160-8db5-a11ca84c51fa
+
+	column PharmacyID
+		dataType: string
+		lineageTag: 2cfa19d2-f813-4209-96bc-4a13f2957061
+		summarizeBy: none
+		sourceColumn: PharmacyID
+
+		annotation SummarizationSetBy = Automatic
+
+	column PharmacyName
+		dataType: string
+		lineageTag: 8635eabb-9dd4-41c3-89dc-71cd9d77a3a3
+		summarizeBy: none
+		sourceColumn: PharmacyName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: b69806e4-f64d-4017-bcda-a3280ef6a821
+		summarizeBy: none
+		sourceColumn: Country
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 6f570d5e-002d-479a-a658-87ac2e4cde29
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 8e5ac21a-f69e-4383-a84e-5a95939d7bd1
+		summarizeBy: none
+		sourceColumn: City
+
+		annotation SummarizationSetBy = Automatic
+
+	column PharmacyType
+		dataType: string
+		lineageTag: eddb780d-1533-418f-96a5-423104837038
+		summarizeBy: none
+		sourceColumn: PharmacyType
+
+		annotation SummarizationSetBy = Automatic
+
+	column OpenDate
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 32314a89-0494-4610-94a7-58ae15d326f8
+		summarizeBy: none
+		sourceColumn: OpenDate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column StoreSizeBand
+		dataType: string
+		lineageTag: 6e7947c9-b096-485a-bc34-dfa7eaffdadb
+		summarizeBy: none
+		sourceColumn: StoreSizeBand
+
+		annotation SummarizationSetBy = Automatic
+
+	column Latitude
+		dataType: double
+		lineageTag: 1a177953-a02e-476f-bc5e-9ee33e39cc2f
+		summarizeBy: none
+		sourceColumn: Latitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Longitude
+		dataType: double
+		lineageTag: 82f33cd1-21fc-45d7-9030-c80a8aec0d29
+		summarizeBy: none
+		sourceColumn: Longitude
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition T_DimPharmacy = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\Thien.Dao\OneDrive - Techtronic Industries Co. Ltd\THIENDAO\PBI\reference\FP20\DataDNA-Pharma-Data-202601\Pharmacy_Data_Challenge_Dataset.xlsx"), null, true),
+				    T_DimPharmacy_Table = Source{[Item="T_DimPharmacy",Kind="Table"]}[Data],
+				    #"Changed Type" = Table.TransformColumnTypes(T_DimPharmacy_Table,{{"PharmacyID", type text}, {"PharmacyName", type text}, {"Country", type text}, {"Region", type text}, {"City", type text}, {"PharmacyType", type text}, {"OpenDate", type date}, {"StoreSizeBand", type text}, {"Latitude", type number}, {"Longitude", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

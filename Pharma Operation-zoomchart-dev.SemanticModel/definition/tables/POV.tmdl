@@ -1,0 +1,48 @@
+table POV
+	lineageTag: 53f79bbe-871f-4062-9a1d-d5c97f59ab91
+
+	column POV
+		lineageTag: eee63292-4443-4915-a35a-7ef6e2fa90b2
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'POV Order'
+
+		relatedColumnDetails
+			groupByColumn: 'POV Fields'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'POV Fields'
+		isHidden
+		lineageTag: 499e4b45-b6e9-46a1-a0f2-889e2c302570
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'POV Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'POV Order'
+		isHidden
+		formatString: 0
+		lineageTag: 7c2acd17-0bf6-4f45-a777-1402987646f6
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition POV = calculated
+		mode: import
+		source =
+				{
+				    ("Country", NAMEOF('T_DimPharmacy'[Country]), 0),
+				    ("Category", NAMEOF('T_DimProduct'[Category]), 1)
+				}
+
+	annotation PBI_Id = c4f83a0f654d40488d94951a5298d56e
+

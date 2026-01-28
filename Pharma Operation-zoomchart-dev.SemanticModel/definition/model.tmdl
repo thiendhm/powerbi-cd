@@ -1,0 +1,32 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["T_DimPharmacy","T_DimDate","T_DimProduct","T_FactSales","Data Dictionary","MetricTable","Period"]
+
+annotation PBI_ProTooling = ["TMDLView_Desktop","DevMode"]
+
+ref table T_DimPharmacy
+ref table T_DimDate
+ref table T_DimProduct
+ref table T_FactSales
+ref table 'Data Dictionary'
+ref table _Measures_Revenue
+ref table _Measures_Profit
+ref table _Measures_Classify
+ref table MetricTable
+ref table _Measures_Helper
+ref table _Measure_CF
+ref table _Measures_Promote
+ref table _0_Test
+ref table POV
+ref table Period
+
+ref cultureInfo en-US
+

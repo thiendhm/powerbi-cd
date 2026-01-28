@@ -1,0 +1,35 @@
+table MetricTable
+	lineageTag: f2eeb278-655c-4da8-af45-7ae1229235ff
+
+	column MetricName
+		dataType: string
+		lineageTag: f7250b70-44e1-4518-8b2c-84b77d3f1a58
+		summarizeBy: none
+		sourceColumn: MetricName
+		sortByColumn: MetricIndex
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column MetricIndex
+		dataType: string
+		lineageTag: 1fdf6331-bb38-4127-b03b-7386e3a46692
+		summarizeBy: none
+		sourceColumn: MetricIndex
+
+		annotation SummarizationSetBy = Automatic
+
+	partition MetricTable = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCkotS80rTVXSUTJUitWJVgrNyyxRCM7PSQGKGIFFfBOL0jPzFApSixRAkkBxY7C4Y1lqUWJ6qoJzfjFI0AQiGBQQCuSYKsXGAgA=", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [MetricName = _t, MetricIndex = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"MetricName", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Exception
+
+	annotation PBI_NavigationStepName = Navigation
+

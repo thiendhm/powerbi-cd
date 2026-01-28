@@ -1,0 +1,42 @@
+table _Measures_Profit
+	lineageTag: f9a4ef64-766e-497f-ae0c-120958f4d7a1
+
+	measure Total_Profit = SUM( T_FactSales[MarginEUR])
+		lineageTag: 1c7ce112-9eca-4456-835b-9d8f232131c1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Gross_Profit_Pct =
+			
+			DIVIDE( SUM( T_FactSales[MarginEUR]) , sum(T_FactSales[RevenueEUR]), 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: be76f38f-b21e-4f6a-a008-1ab9c820e7ac
+
+	measure ROI = DIVIDE( sum(T_FactSales[MarginEUR]) , sum(T_FactSales[CostEUR]) , 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: d25a79fd-47ab-4031-9dbe-f9146089e9bc
+
+	measure Margin_perQty = DIVIDE( sum(T_FactSales[MarginEUR]), SUM(T_FactSales[UnitsSold]), 0)
+		formatString: 0.00
+		lineageTag: 6c2852bf-b5cf-4bca-9cf0-0b5859f3938e
+
+	measure UnitCost_cal = DIVIDE( sum(T_FactSales[CostEUR]), sum(T_FactSales[UnitsSold]),0)
+		lineageTag: d38baa94-8ddb-4b4d-993d-93aa57041867
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Value
+		formatString: 0
+		lineageTag: 5372f463-5d85-4bfe-bec2-bfa1a3c25290
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures_Profit = calculated
+		mode: import
+		source = {blank()}
+
+	annotation PBI_Id = 88be2093a8f34a7dada41b55b6ce7e6c
+

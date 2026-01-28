@@ -1,0 +1,67 @@
+table _Measures_Helper
+	lineageTag: c46c85fd-7501-43b9-9d0d-6b66dfbad0aa
+
+	measure Check_Filter_Date = ISFILTERED(T_DimDate)
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: a93e1c1b-f74a-4ab0-ba72-c57f28d92743
+
+	measure TopProduct_toBrand_Value = ```
+			
+			var _Rank = 
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[ProductName]), ORDERBY([SelectMetric], ASC))
+			
+			VAR _Result_Value = IF( _Rank <=1, [SelectMetric])
+			RETURN _Result_Value
+			```
+		lineageTag: 43fde905-6f47-44ff-8702-a2aa3f5a0c54
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure TopBrand_Name = ```
+			
+			VAR AggTable = SUMMARIZE(T_FactSales, T_DimProduct[Brand],"Metric", [SelectMetric])
+			VAR MaxValue =
+			CALCULATE( 
+			    MAXX( AggTable, [Metric]))
+			VAR CategoryMax =  MAXX ( TOPN (1, AggTable, [Metric], DESC) , T_DimProduct[Brand])
+			RETURN CategoryMax
+			```
+		lineageTag: 6e84dddb-37df-4ef1-abb0-07b31977fb44
+
+	measure TopCity_Name_byBrand = ```
+			
+			VAR AggTable = SUMMARIZE(T_FactSales, T_DimPharmacy[City],"Metric", [SelectMetric])
+			VAR MaxValue =
+			CALCULATE( 
+			    MAXX( AggTable, [Metric]))
+			VAR CategoryMax =  MAXX ( TOPN (1, AggTable, [Metric], DESC) , T_DimPharmacy[City])
+			RETURN CategoryMax
+			```
+		lineageTag: d116c8a7-298f-47dd-8b48-e10682107514
+
+	measure TopCountry_Name_byBrand = ```
+			
+			VAR AggTable = SUMMARIZE(T_FactSales, T_DimPharmacy[Country],"Metric", [SelectMetric])
+			VAR MaxValue =
+			CALCULATE( 
+			    MAXX( AggTable, [Metric]))
+			VAR CategoryMax =  MAXX ( TOPN (1, AggTable, [Metric], DESC) , T_DimPharmacy[Country])
+			RETURN CategoryMax
+			```
+		lineageTag: cc53c7ac-9a0f-4162-b464-e6c4ee712836
+
+	column Value
+		formatString: 0
+		lineageTag: 0650a782-a223-4c46-b01a-39c0d9529388
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures_Helper = calculated
+		mode: import
+		source = {blank()}
+
+	annotation PBI_Id = a27b604c4bba4aa2bb4589e745e52bed
+

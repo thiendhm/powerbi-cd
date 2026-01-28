@@ -1,0 +1,37 @@
+table _Measures_Revenue
+	lineageTag: 9e95736c-43d6-4a75-a58d-e1e9fca15471
+
+	measure TotalRevenue = sum(T_FactSales[RevenueEUR])
+		lineageTag: d1f47877-f115-44d6-9555-4bae4d4f890d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Rev_Cumul QTD' =
+			
+			CALCULATE( [TotalRevenue] , DATESQTD(T_DimDate[Date]))
+		formatString: 0
+		lineageTag: 2e3631d6-358b-4976-bcb6-7562af0d43d1
+
+	measure Total_UnitSold = sum(T_FactSales[UnitsSold])
+		formatString: 0
+		lineageTag: 5530c76d-d0ba-47fc-8dce-3f8a11080706
+
+	measure Revenue_by_Unit = DIVIDE( sum(T_FactSales[RevenueEUR]), sum(T_FactSales[UnitsSold]), 0)
+		formatString: 0
+		lineageTag: 9923c587-7441-471a-aa60-c208d9f40ad6
+
+	column Value
+		formatString: 0
+		lineageTag: aebe4b67-787a-431c-ae28-e0dcba51b5a9
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures_Revenue = calculated
+		mode: import
+		source = {blank()}
+
+	annotation PBI_Id = bf7dfd03705c4e6e814b66ffd7a594c5
+

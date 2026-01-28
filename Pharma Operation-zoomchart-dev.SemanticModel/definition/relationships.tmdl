@@ -1,0 +1,12 @@
+relationship AutoDetected_8ba00d5a-119f-489e-a8b0-a51147442170
+	fromColumn: T_FactSales.PharmacyID
+	toColumn: T_DimPharmacy.PharmacyID
+
+relationship AutoDetected_918faeeb-9bcf-4ad3-9c4e-4c0f8f635b64
+	fromColumn: T_FactSales.DateKey
+	toColumn: T_DimDate.DateKey
+
+relationship AutoDetected_5f1facee-e579-4743-a7af-922553857b84
+	fromColumn: T_FactSales.ProductID
+	toColumn: T_DimProduct.ProductID
+

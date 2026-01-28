@@ -1,0 +1,104 @@
+table 'Data Dictionary'
+	lineageTag: cf67ef9b-7a37-4814-8898-199bce38f3ce
+
+	column Table
+		dataType: string
+		lineageTag: 8a5829df-6a1e-4d8c-9442-ffb16ea68498
+		summarizeBy: none
+		sourceColumn: Table
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column
+		dataType: string
+		lineageTag: 0a0f3934-f6f5-40a7-ae48-bd69a9623ba2
+		summarizeBy: none
+		sourceColumn: Column
+
+		annotation SummarizationSetBy = Automatic
+
+	column Example
+		dataType: string
+		lineageTag: e94d7a20-72bb-4b8b-8457-cd6babdb1dd8
+		summarizeBy: none
+		sourceColumn: Example
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Meaning (plain English)'
+		dataType: string
+		lineageTag: ce0d0ed6-c1b3-4dd9-8613-3422bc319ab5
+		summarizeBy: none
+		sourceColumn: Meaning (plain English)
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column5
+		dataType: string
+		lineageTag: e4df59b2-05b3-468c-96df-5c203de4f596
+		summarizeBy: none
+		sourceColumn: Column5
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column6
+		dataType: string
+		lineageTag: 7607e71a-0eff-42ec-8dd2-973dda400ffd
+		summarizeBy: none
+		sourceColumn: Column6
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column7
+		dataType: string
+		lineageTag: fbc82508-6b41-4966-b82a-842257ac97f2
+		summarizeBy: none
+		sourceColumn: Column7
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column8
+		dataType: string
+		lineageTag: d41228fb-45d7-4295-88a1-d5ec31f2994d
+		summarizeBy: none
+		sourceColumn: Column8
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column9
+		dataType: string
+		lineageTag: 1813e15a-4877-49a2-9472-a1da94ddb8f6
+		summarizeBy: none
+		sourceColumn: Column9
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column10
+		dataType: string
+		lineageTag: ef1c6b3a-162a-4aca-bfe6-b435067a73cc
+		summarizeBy: none
+		sourceColumn: Column10
+
+		annotation SummarizationSetBy = Automatic
+
+	column Column11
+		dataType: string
+		lineageTag: 1334d8b2-7be8-4c06-87d0-01d7bc351937
+		summarizeBy: none
+		sourceColumn: Column11
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Data Dictionary' = m
+		mode: import
+		source =
+				let
+				    Source = Excel.Workbook(File.Contents("C:\Users\Thien.Dao\OneDrive - Techtronic Industries Co. Ltd\THIENDAO\PBI\reference\FP20\DataDNA-Pharma-Data-202601\Pharmacy_Data_Challenge_Dataset.xlsx"), null, true),
+				    #"Data Dictionary_Sheet" = Source{[Item="Data Dictionary",Kind="Sheet"]}[Data],
+				    #"Promoted Headers" = Table.PromoteHeaders(#"Data Dictionary_Sheet", [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Table", type text}, {"Column", type text}, {"Example", type any}, {"Meaning (plain English)", type text}, {"Column5", type any}, {"Column6", type any}, {"Column7", type any}, {"Column8", type any}, {"Column9", type any}, {"Column10", type any}, {"Column11", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

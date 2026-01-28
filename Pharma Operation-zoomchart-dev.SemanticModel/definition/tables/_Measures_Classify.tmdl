@@ -1,0 +1,652 @@
+table _Measures_Classify
+	lineageTag: ec59c4c1-3afb-4ba2-9b82-426f5c959efa
+
+	measure '01_Revenue Rank' = ```
+			-- high revenue - high rank
+			var _Rank = 
+			SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyName]), ORDERBY([TotalRevenue], ASC)),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[City]), ORDERBY([TotalRevenue], ASC)),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[Country]), ORDERBY([TotalRevenue], ASC)),
+			    BLANK()
+			)
+			
+			RETURN _Rank
+			```
+		formatString: 0
+		displayFolder: Class
+		lineageTag: ccf5f883-5640-46c8-ba57-e83bb86cc273
+
+	measure 02_RevenueTier = ```
+			
+			VAR _Measure = [01_Revenue Rank]
+			VAR TotalCount =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[City])),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[Country])),
+			    BLANK()
+			)
+			VAR _Tier =
+			SWITCH( TRUE(),
+			ISBLANK( _Measure) , BLANK(),
+			_Measure <= TotalCount *0.5, "Low",
+			_Measure > TotalCount *0.5, "High",
+			BLANK()
+			)
+			RETURN _Tier
+			```
+		displayFolder: Class
+		lineageTag: 1817d3b1-48f6-4d42-910f-4dba04eca10c
+
+	measure 03_MarginPctRank = ```
+			
+			var _Rank = 
+			SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyName]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[PharmacyType]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyType]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[StoreSizeBand]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[StoreSizeBand]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[City]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[Country]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    
+			    ISINSCOPE(T_DimProduct[Brand]),
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[Brand]), ORDERBY([Gross_Profit_Pct], ASC))
+			)
+			
+			RETURN _Rank
+			```
+		formatString: 0
+		lineageTag: 7f2b63e3-8513-451e-8a7e-af317971543b
+
+	measure 04_MarginPctTier = ```
+			
+			VAR _Measure = [03_MarginPctRank]
+			VAR TotalCount =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[City])),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[Country])),
+			
+			    ISINSCOPE(T_DimProduct[Brand]),
+			    COUNTROWS(ALLSELECTED(T_DimProduct[Brand])),
+			    BLANK()
+			)
+			VAR _Tier =
+			SWITCH( TRUE(),
+			ISBLANK( _Measure) , BLANK(),
+			_Measure <= TotalCount *0.4, "Low", -- high
+			_Measure > TotalCount *0.6, "High",
+			BLANK()
+			)
+			RETURN _Tier
+			```
+		displayFolder: Class
+		lineageTag: a7d386bc-9ffb-4897-a782-fcc93aee10d3
+
+	measure 05_UnitCostRank = ```
+			-- higher cost -- higher rank- higher score - worse
+			var _Rank = 
+			SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyName]), ORDERBY([UnitCost_cal], ASC)),
+			    ISINSCOPE(T_DimPharmacy[PharmacyType]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyType]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[StoreSizeBand]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[StoreSizeBand]), ORDERBY([Gross_Profit_Pct], ASC)),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[City]), ORDERBY([UnitCost_cal], ASC)),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[Country]), ORDERBY([UnitCost_cal], ASC)),
+			    BLANK()
+			)
+			
+			RETURN _Rank
+			```
+		formatString: 0
+		displayFolder: Class
+		lineageTag: 7b29310a-faff-4660-8c30-b71ca3b1992b
+
+	measure 06_UnitCostTier = ```
+			--higher rank higher cost
+			VAR _Measure = [05_UnitCostRank]
+			VAR TotalCount =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[City])),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[Country])),
+			    BLANK()
+			)
+			VAR _Tier =
+			SWITCH( TRUE(),
+			ISBLANK( _Measure) , BLANK(),
+			_Measure <= TotalCount *0.33, "Good", -- high, tier good
+			_Measure > TotalCount *0.33 && _Measure <= TotalCount *0.67, "Medium",
+			_Measure > 0.67, "Bad",  --"Low",
+			BLANK()
+			)
+			RETURN _Tier
+			```
+		displayFolder: Class
+		lineageTag: d09d7680-7686-4705-a820-9eb58161dab3
+
+	measure Class_Index =
+			
+			-- revenue, margin high - good, cost high - bad
+			SWITCH( TRUE(),
+			 [04_MarginPctTier] = "High"  && [12_UnitSoldTier] = "High", "A-Star",
+			 [04_MarginPctTier] = "Low"  && [12_UnitSoldTier] = "High", "B-Low Margin High Vol",
+			 [04_MarginPctTier] = "High"  && [12_UnitSoldTier] = "Low", "C-High Margin Low Vol",
+			 [04_MarginPctTier] = "Low"  && [12_UnitSoldTier] = "Low", "F-Stop",
+			 "F-Stop"
+			)
+		displayFolder: Class
+		lineageTag: 6e0adc38-b543-48f4-bbbb-fdca4f6e397f
+
+	measure 06b_UnitCostTier_HighGood = ```
+			--higher rank higher cost - worse
+			VAR _Measure = [05_UnitCostRank]
+			VAR TotalCount =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[City])),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[Country])),
+			    BLANK()
+			)
+			VAR _Tier =
+			SWITCH( TRUE(),
+			ISBLANK( _Measure) , BLANK(),
+			_Measure <= TotalCount *0.33, 1, -- high
+			_Measure > TotalCount *0.33 && [01_Revenue Rank] <= TotalCount *0.67, 2,
+			_Measure > 0.67, 3,  --"Low",
+			BLANK()
+			)
+			RETURN _Tier
+			```
+		formatString: 0
+		displayFolder: Class
+		lineageTag: 44f9f4c1-dac5-439c-9857-ce8b8cc9e31f
+
+	measure '07_Revenue Score' = ```
+			
+			VAR _Measure = [TotalRevenue]
+			VAR _AllSelectMaxByLocation =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			            "Metric",
+			            [TotalRevenue]
+			        ),
+			    [Metric]
+			    ),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[City]),
+			            "Metric",
+			            [TotalRevenue]
+			        ),
+			        [Metric]
+			        ),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[Country]),
+			            "Metric",
+			            [TotalRevenue]
+			        ),
+			        [Metric]
+			        ),
+			    BLANK()
+			    )
+			VAR Score = DIVIDE(_Measure, _AllSelectMaxByLocation,0) * 100
+			RETURN  Score
+			```
+		lineageTag: 21736b47-71c7-42b4-b72a-a3a0e9c15ac9
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '08_Margin% Score' = ```
+			
+			VAR _AllSelectMax =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			            "Metric",
+			            [Gross_Profit_Pct]
+			        ),
+			        [Metric]
+			        ),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[City]),
+			            "Metric",
+			            [Gross_Profit_Pct]
+			        ),
+			        [Metric]
+			        ),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			        MAXX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[Country]),
+			            "Metric",
+			            [Gross_Profit_Pct]
+			        ),
+			        [Metric]
+			        ),
+			    BLANK()
+			)
+			VAR Score = DIVIDE([Gross_Profit_Pct] , _AllSelectMax,0) * 100
+			RETURN Score
+			```
+		formatString: 0.00
+		lineageTag: b91eef34-613f-42ee-a2a4-1d03c01a2125
+
+	measure '09_UnitCost Score' = ```
+			
+			VAR _AllSelectMin =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			        MINX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			            "Metric",
+			            [UnitCost_cal]
+			        ),
+			        [Metric]
+			        ),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			        MINX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[City]),
+			            "Metric",
+			            [UnitCost_cal]
+			        ),
+			        [Metric]
+			        ),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			        MINX( 
+			        SELECTCOLUMNS( 
+			            ALLSELECTED(T_DimPharmacy[Country]),
+			            "Metric",
+			            [UnitCost_cal]
+			        ),
+			        [Metric]
+			        ),
+			    BLANK()
+			)
+			VAR Score = DIVIDE(_AllSelectMin, [UnitCost_cal],0) * 100
+			RETURN Score
+			```
+		lineageTag: 62226708-71da-4805-a1c5-67f323db1ba0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 10_Score = 0.3* [07_Revenue Score] + 0.4 * [08_Margin% Score] + 0.3 * [09_UnitCost Score]
+		lineageTag: 53f4c48c-3f4f-4791-abe9-d86e97816310
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '11_UnitSold Rank' = ```
+			
+			var _Rank = 
+			SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[PharmacyName]), ORDERBY([Total_UnitSold], ASC)),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[City]), ORDERBY([Total_UnitSold], ASC)),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    RANK(DENSE, ALLSELECTED(T_DimPharmacy[Country]), ORDERBY([Total_UnitSold], ASC)),
+			
+			        ISINSCOPE(T_DimProduct[ProductName]),
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[ProductName]), ORDERBY([Total_UnitSold], ASC)),
+			        ISINSCOPE(T_DimProduct[Brand]),
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[Brand]), ORDERBY([Total_UnitSold], ASC)),
+			    BLANK()
+			)
+			
+			RETURN _Rank
+			```
+		formatString: 0
+		lineageTag: 1ba658ac-d0f7-4ca8-b8ba-d5d0893355fa
+
+	measure 12_UnitSoldTier = ```
+			
+			VAR _Measure = [11_UnitSold Rank]
+			VAR TotalCount =
+			    SWITCH(TRUE(),
+			    ISINSCOPE(T_DimPharmacy[PharmacyName]),    
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			    ISINSCOPE(T_DimPharmacy[City]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[City])),
+			    ISINSCOPE(T_DimPharmacy[Country]),
+			    COUNTROWS(ALLSELECTED(T_DimPharmacy[Country])),
+			
+			            ISINSCOPE(T_DimProduct[ProductName]),
+			    COUNTROWS(ALLSELECTED(T_DimProduct[ProductName])),
+			        ISINSCOPE(T_DimProduct[Brand]),
+			    COUNTROWS(ALLSELECTED(T_DimProduct[Brand])),
+			    BLANK()
+			)
+			VAR _Tier =
+			SWITCH( TRUE(),
+			ISBLANK( _Measure) , BLANK(),
+			_Measure <= TotalCount *0.4, "Low",
+			_Measure > TotalCount *0.6 , "High",
+			BLANK()
+			)
+			RETURN _Tier
+			```
+		displayFolder: Class
+		lineageTag: 5b3ee842-e1e5-4953-8396-02bddac2d40e
+
+	measure SelectMetric =
+			
+			SWITCH( SELECTEDVALUE(MetricTable[MetricName]),
+			"Revenue", [TotalRevenue],
+			"Unit Sold", [Total_UnitSold],
+			"Margin per Unit",  IF ( [Check_Filter_Date], [Margin_perQty],[Margin_perQty]),-- normalize for comparison
+			"Average Cost", IF ( [Check_Filter_Date], [UnitCost_cal], [UnitCost_cal]*100),
+			"ARPU", DIVIDE( [TotalRevenue], [Total_UnitSold],0),
+			blank()
+			)
+		lineageTag: 24412501-e15a-4e98-aceb-25327bbf242b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Top10Metric_ProductValue = ```
+			
+			var _Rank = 
+			SWITCH(TRUE(),
+			    ISINSCOPE(T_DimProduct[ProductName]),    
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[ProductName]), ORDERBY([SelectMetric], ASC)),
+			    ISINSCOPE(T_DimProduct[Brand]),    
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[Brand]), ORDERBY([SelectMetric], ASC)),
+			    ISINSCOPE(T_DimProduct[Category]),    
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[Category]), ORDERBY([SelectMetric], ASC)),
+			    ISINSCOPE(T_DimProduct[IsGeneric]),
+			    RANK(DENSE, ALLSELECTED(T_DimProduct[IsGeneric]), ORDERBY([SelectMetric], ASC)),
+			    BLANK()
+			)
+			VAR _Result = IF( _Rank <=10, [SelectMetric])
+			RETURN _Result
+			```
+		lineageTag: 8c267d86-2b20-4b95-ae4f-5d545676f467
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure CumulMetric_desc =
+			
+			VAR CurrentItemRankCountry =
+			    RANKX(
+			            ALLSELECTED(T_DimPharmacy[Country]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentItemRankRegion =
+			    RANKX(
+			            ALLSELECTED(T_DimPharmacy[Region]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentItemRankCity =
+			    RANKX(
+			            ALLSELECTED(T_DimPharmacy[city]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentItemRankStore =
+			    RANKX(
+			            ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentItemRankCategory=
+			    RANKX(
+			            ALLSELECTED(T_DimProduct[Category]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			/*
+			SWITCH(TRUE(),
+			 ISINSCOPE( T_DimPharmacy[PharmacyName]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			 ISINSCOPE(T_DimPharmacy[PharmacyType]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[PharmacyType])),
+			 ISINSCOPE(T_DimPharmacy[StoreSizeBand]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[StoreSizeBand])),
+			 ISINSCOPE(T_DimPharmacy[City]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[City])),
+			 ISINSCOPE(T_DimPharmacy[Country]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[Country]))
+			)
+			*/
+			VAR ResultCountry =
+			        CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimPharmacy[Country]),
+			            RANKX(
+			                ALLSELECTED(T_DimPharmacy[Country]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankCountry
+			        )
+			    )
+			VAR ResultRegion =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimPharmacy[Region]),
+			            RANKX(
+			                ALLSELECTED(T_DimPharmacy[Region]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankRegion
+			        )
+			    )
+			VAR ResultCity =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimPharmacy[city]),
+			            RANKX(
+			                ALLSELECTED(T_DimPharmacy[city]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankCity
+			        )
+			    )
+			VAR ResultStore =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			            RANKX(
+			                ALLSELECTED(T_DimPharmacy[PharmacyName]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankStore
+			        )
+			    )
+			VAR ResultCategory =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimProduct[Category]),
+			            RANKX(
+			                ALLSELECTED(T_DimProduct[Category]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankCategory
+			        )
+			    )
+			RETURN
+			SWITCH(TRUE(),
+			 ISINSCOPE( T_DimPharmacy[PharmacyName]),
+			    ResultStore,
+			 ISINSCOPE(T_DimPharmacy[City]),
+			    ResultCity,
+			 ISINSCOPE(T_DimPharmacy[Country]),
+			    ResultCountry,
+			 ISINSCOPE(T_DimPharmacy[Region]),
+			    ResultRegion,
+			 ISINSCOPE(T_DimProduct[Category]),
+			    ResultCategory
+			)
+		lineageTag: 9aa4a5d9-4b1b-4068-a367-ea7cc6bf5bee
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure CumulPct = ```
+			
+			VAR Total = 
+			SWITCH(TRUE(),
+			 ISINSCOPE( T_DimPharmacy[PharmacyName]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[PharmacyName])),
+			 ISINSCOPE(T_DimPharmacy[PharmacyType]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[PharmacyType])),
+			 ISINSCOPE(T_DimPharmacy[StoreSizeBand]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[StoreSizeBand])),
+			 ISINSCOPE(T_DimPharmacy[City]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[City])),
+			  ISINSCOPE(T_DimPharmacy[Region]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[Region])),
+			 ISINSCOPE(T_DimPharmacy[Country]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimPharmacy[Country])),
+			  ISINSCOPE(T_DimProduct[Category]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimProduct[Category]))
+			)
+			RETURN divide( [CumulMetric_desc], Total, 0)
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 7c6d9962-3df8-4c9f-ae58-53204813030d
+
+	measure CumulMetric_Prod_desc =
+			
+			VAR CurrentRankProductName =
+			    RANKX(
+			            ALLSELECTED(T_DimProduct[ProductName]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentRankBrand =
+			    RANKX(
+			            ALLSELECTED(T_DimProduct[Brand]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR CurrentItemRankCategory=
+			    RANKX(
+			            ALLSELECTED(T_DimProduct[Category]),
+			        [SelectMetric],
+			        ,DESC, Dense// ← remove filter on items                    // or Skip – your choice
+			    )
+			VAR ResultName =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimProduct[ProductName]),
+			            RANKX(
+			                ALLSELECTED(T_DimProduct[ProductName]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentRankProductName
+			        )
+			    )
+			VAR ResultBrand =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimProduct[Brand]),
+			            RANKX(
+			                ALLSELECTED(T_DimProduct[Brand]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentRankBrand
+			        )
+			    )
+			
+			VAR ResultCategory =
+			            CALCULATE(
+			        [SelectMetric],
+			        FILTER(
+			            ALLSELECTED(T_DimProduct[Category]),
+			            RANKX(
+			                ALLSELECTED(T_DimProduct[Category]),
+			                [SelectMetric],
+			                , DESC, Dense
+			            ) <= CurrentItemRankCategory
+			        )
+			    )
+			RETURN
+			SWITCH(TRUE(),
+			 ISINSCOPE( T_DimProduct[ProductName]),
+			    ResultName,
+			 ISINSCOPE(T_DimProduct[Brand]),
+			    ResultBrand,
+			 ISINSCOPE(T_DimProduct[Category]),
+			    ResultCategory
+			)
+		lineageTag: 5f498cdf-5b65-4e78-8081-2d56c250240d
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure CumulPct_Product = ```
+			
+			VAR Cumul = [CumulMetric_Prod_desc]
+			VAR Total = 
+			SWITCH(TRUE(),
+			 ISINSCOPE( T_DimProduct[ProductName]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimProduct[ProductName])),
+			 ISINSCOPE(T_DimProduct[Brand]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimProduct[Brand])),
+			 ISINSCOPE(T_DimProduct[Category]),
+			    CALCULATE( [SelectMetric], ALLSELECTED(T_DimProduct[Category])),
+			    BLANK()
+			)
+			RETURN divide( Cumul, Total, 0)
+			```
+		lineageTag: dfb5576c-babe-4f68-ba3b-bd7a6db1892b
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Value
+		formatString: 0
+		lineageTag: bf348f32-77a7-4148-97e8-f9c3176c9085
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures_Classify = calculated
+		mode: import
+		source = {blank()}
+
+	annotation PBI_Id = 712223e1398d42d78bffa1a98e03aedd
+

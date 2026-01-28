@@ -1,0 +1,164 @@
+table _Measures_Promote
+	lineageTag: ff122daf-59c8-43e6-91d2-acde48fa124f
+
+	measure Daily_Volume_AVG_Promote =
+			
+			CALCULATE( AVERAGEX( values(T_DimDate[Date]), [Total_UnitSold]), T_FactSales[PromoFlag] = "Yes")
+		lineageTag: 769b0b32-642b-49ff-a612-952a1c3302eb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Daily_Volume_AVG_NoPromote =
+			
+			CALCULATE( AVERAGEX( values(T_DimDate[Date]), [Total_UnitSold]), T_FactSales[PromoFlag] = "No")
+		lineageTag: e48c2372-f765-4a69-aab9-fef18ffa7ca0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Volume_Lift% =
+			
+			DIVIDE( [Daily_Volume_AVG_Promote] - [Daily_Volume_AVG_NoPromote], [Daily_Volume_AVG_NoPromote], 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 834fb064-dd3d-4c47-8e77-6e8919f2fd40
+
+	measure Daily_Revenue_AVG_Promote =
+			
+			CALCULATE( AVERAGEX( values(T_DimDate[Date]), [TotalRevenue]), T_FactSales[PromoFlag] = "Yes")
+		lineageTag: a6d04399-65f0-4c07-b7f4-613baddb4ec8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Daily_Revenue_AVG_NoPromote =
+			
+			CALCULATE( AVERAGEX( values(T_DimDate[Date]), [TotalRevenue]), T_FactSales[PromoFlag] = "No")
+		lineageTag: 8be45802-042d-44c0-a3e2-a17248918845
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Revenue_Lift% =
+			
+			DIVIDE( [Daily_Revenue_AVG_Promote] - [Daily_Revenue_AVG_NoPromote], [Daily_Revenue_AVG_NoPromote] , 0)
+		lineageTag: 51ddce77-62f0-4e84-8a5d-cf33859cc9f6
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure Pct_PromovsAll =
+			
+			VAR YesPromoCount =CALCULATE( COUNTROWS( SUMMARIZE( T_FactSales, T_DimProduct[ProductID])), T_FactSales[PromoFlag] = "Yes")
+			VAR CountAll = COUNTROWS( SUMMARIZE(T_FactSales, T_FactSales[ProductID]))
+			RETURN DIVIDE( YesPromoCount, CountAll, 0)
+		formatString: 0%;-0%;0%
+		lineageTag: 44fff6e1-9c3e-4226-a47a-6e5a958436c5
+
+	measure 'Promotion ROI' = ```
+			
+			VAR PromoMarginPct = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[MarginEUR]), T_FactSales[PromoFlag] = "Yes"),
+			    CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "Yes"),
+			    0)
+			VAR NoPromoMarginPct = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[MarginEUR]), T_FactSales[PromoFlag] = "No"),
+			    CALCULATE(sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "No"),
+			    0)
+			VAR UnitCostPromo = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[CostEUR]), T_FactSales[PromoFlag] = "Yes"),
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "Yes"),
+			    0)
+			VAR UnitCost_NoPromo = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[CostEUR]), T_FactSales[PromoFlag] = "No"),
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "No"),
+			    0)
+			VAR CurrentImpact = divide( PromoMarginPct - NoPromoMarginPct, UnitCostPromo - UnitCost_NoPromo, 0)
+			RETURN CurrentImpact
+			```
+		formatString: 0
+		lineageTag: a8206205-82b6-48dd-9812-1395924f3262
+
+	measure Promo_Pct = ```
+			
+			VAR UnitCostPromo = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[CostEUR]), T_FactSales[PromoFlag] = "Yes"),
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "Yes"),
+			    0)
+			VAR RevenuePromo = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[RevenueEUR]), T_FactSales[PromoFlag] = "Yes"),
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "Yes"),
+			    0)
+			VAR UnitCost_NoPromo = 
+			DIVIDE(
+			    CALCULATE(sum(T_FactSales[CostEUR]), T_FactSales[PromoFlag] = "No"),
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "No"),
+			    0)
+			VAR Revenue_NoPromoStandard = 
+			DIVIDE(
+			    SUMX( FILTER(T_FactSales, T_FactSales[PromoFlag] = "Yes"), LOOKUPVALUE(T_DimProduct[ListPriceEUR], T_DimProduct[ProductID], T_FactSales[ProductID]) * T_FactSales[UnitsSold]), 
+			        CALCULATE( sum(T_FactSales[UnitsSold]), T_FactSales[PromoFlag] = "Yes"),
+			    0)
+			VAR Actual = divide( UnitCost_NoPromo - UnitCostPromo, UnitCost_NoPromo, 0)
+			VAR Baseline = divide(  Revenue_NoPromoStandard -RevenuePromo, Revenue_NoPromoStandard, 0)
+			RETURN Baseline
+			```
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: f5e53874-d909-49ef-8cb3-7af171f0b632
+
+	measure VolumeLiftPerCost% =
+			
+			VAR NoPromo = CALCULATE( DIVIDE( SUM(T_FactSales[UnitsSold]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "No")
+			VAR HasPromo = CALCULATE( DIVIDE( SUM(T_FactSales[UnitsSold]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "Yes")
+			RETURN divide( HasPromo - NoPromo, NoPromo, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 09fe5dec-2a11-44d0-820e-26d4fb635a4d
+
+	measure RevenueLiftPerCost% =
+			
+			VAR NoPromo = CALCULATE( DIVIDE( SUM(T_FactSales[RevenueEUR]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "No")
+			VAR HasPromo = CALCULATE( DIVIDE( SUM(T_FactSales[RevenueEUR]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "Yes")
+			RETURN divide( NoPromo- HasPromo, NoPromo, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 5a0f8a31-402e-4ce4-9340-990789596dc8
+
+	measure MarginPctChange =
+			
+			VAR NoPromo = CALCULATE(DIVIDE( sum(T_FactSales[MarginEUR]), sum(T_FactSales[UnitsSold]), 0), T_FactSales[PromoFlag] = "No")
+			VAR HasPromo = CALCULATE(DIVIDE( sum(T_FactSales[MarginEUR]), sum(T_FactSales[UnitsSold]), 0), T_FactSales[PromoFlag] = "Yes")
+			RETURN DIVIDE(  HasPromo - NoPromo, NoPromo, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: e9f7af8f-f971-4839-8c50-82b037623de4
+
+	measure MarginLiftPerCost% =
+			
+			VAR NoPromo = CALCULATE( DIVIDE( SUM(T_FactSales[MarginEUR]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "No")
+			VAR HasPromo = CALCULATE( DIVIDE( SUM(T_FactSales[MarginEUR]), sum(T_FactSales[CostEUR]),0), T_FactSales[PromoFlag] = "Yes")
+			RETURN divide( HasPromo - NoPromo, NoPromo, 0)
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 4a569ebd-1aa4-4b62-b100-14069d42c9be
+
+	measure PromotePct =
+			
+			VAR _Promote = CALCULATE([SelectMetric], T_FactSales[PromoFlag] = "Yes")
+			VAR _NoPromote = CALCULATE([SelectMetric], T_FactSales[PromoFlag] = "No")
+			RETURN DIVIDE( _Promote, _NoPromote, 0)
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: d8b2ad3d-97fc-42bb-8f2e-3f389be92ef1
+
+	column Value
+		formatString: 0
+		lineageTag: a3637b5c-11ee-4a28-8ff6-d595aad1c575
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures_Promote = calculated
+		mode: import
+		source = {blank()}
+
+	annotation PBI_Id = 36cdbc5dcf0148119a037168aa12dc09
+
