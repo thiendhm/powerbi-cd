@@ -1,0 +1,125 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/report/3.1.0/schema.json",
+  "themeCollection": {
+    "baseTheme": {
+      "name": "CY24SU10",
+      "reportVersionAtImport": {
+        "visual": "1.8.100",
+        "report": "2.0.100",
+        "page": "1.3.100"
+      },
+      "type": "SharedResources"
+    },
+    "customTheme": {
+      "name": "PharmaTeal3743726020830864.json",
+      "reportVersionAtImport": {
+        "visual": "2.5.0",
+        "report": "3.1.0",
+        "page": "2.3.0"
+      },
+      "type": "RegisteredResources"
+    }
+  },
+  "objects": {
+    "section": [
+      {
+        "properties": {
+          "verticalAlignment": {
+            "expr": {
+              "Literal": {
+                "Value": "'Top'"
+              }
+            }
+          }
+        }
+      }
+    ],
+    "outspacePane": [
+      {
+        "properties": {
+          "visible": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          },
+          "expanded": {
+            "expr": {
+              "Literal": {
+                "Value": "false"
+              }
+            }
+          }
+        }
+      }
+    ]
+  },
+  "publicCustomVisuals": [
+    "ChicletSlicer1448559807354",
+    "stackedBarChartByAkvelonA90827240A9942A3B5F760DFAFF0EF08",
+    "ZoomChartsDrillDownPieProC062D62DA5CE45ECB95B7B1D0E5DA558",
+    "ZoomChartsPieChartPaidE77E4ED357DC402ABA005987437CF500",
+    "ZoomChartsDrillDownBubblePro2B1E93FCC33E4BE6A2BF7A8B1AA7FACA",
+    "ZoomChartsScatterChartPaidA2C55E4B59078FDD51C4CD1C4D4E6623V9N8",
+    "ZoomChartsDrillDownMapPro6AFEEB10499543F282BD06EF315D5EAA",
+    "ZoomChartsDrillDownComboBarProE77E4ED357DC402ABA005987437CF800"
+  ],
+  "resourcePackages": [
+    {
+      "name": "SharedResources",
+      "type": "SharedResources",
+      "items": [
+        {
+          "name": "CY24SU10",
+          "path": "BaseThemes/CY24SU10.json",
+          "type": "BaseTheme"
+        }
+      ]
+    },
+    {
+      "name": "RegisteredResources",
+      "type": "RegisteredResources",
+      "items": [
+        {
+          "name": "teal-pharma-home048996121815243265.svg",
+          "path": "teal-pharma-home048996121815243265.svg",
+          "type": "Image"
+        },
+        {
+          "name": "teal-pharma-location20114781734141784.svg",
+          "path": "teal-pharma-location20114781734141784.svg",
+          "type": "Image"
+        },
+        {
+          "name": "teal-pharma-product6608638913116275.svg",
+          "path": "teal-pharma-product6608638913116275.svg",
+          "type": "Image"
+        },
+        {
+          "name": "PharmaTeal3743726020830864.json",
+          "path": "PharmaTeal3743726020830864.json",
+          "type": "CustomTheme"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "useStylableVisualContainerHeader": true,
+    "exportDataMode": "AllowSummarized",
+    "defaultFilterActionIsDataFilter": true,
+    "defaultDrillFilterOtherVisuals": true,
+    "allowChangeFilterTypes": true,
+    "useEnhancedTooltips": true,
+    "useDefaultAggregateDisplayName": true,
+    "customMemoryLimit": "1048576",
+    "customTimeoutLimit": "225"
+  },
+  "slowDataSourceSettings": {
+    "isCrossHighlightingDisabled": false,
+    "isSlicerSelectionsButtonEnabled": false,
+    "isFilterSelectionsButtonEnabled": false,
+    "isFieldWellButtonEnabled": false,
+    "isApplyAllButtonEnabled": false
+  }
+}
